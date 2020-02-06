@@ -9,8 +9,8 @@ use Omnipay\Common\Message\AbstractRequest;
  */
 class PurchaseRequest extends AbstractRequest
 {
-    protected $liveEndpoint = 'https://www.payfast.co.za/eng/process';
-    protected $testEndpoint = 'https://sandbox.payfast.co.za/eng/process';
+    protected $liveEndpoint = 'https://www.payfast.co.za/eng/';
+    protected $testEndpoint = 'https://sandbox.payfast.co.za/eng/';
     protected $APIEndpoint  = 'https://api.payfast.co.za/subscriptions/';
 
     public function getMerchantId()
@@ -277,7 +277,8 @@ class PurchaseRequest extends AbstractRequest
           ];
           $data['body'] = [
             'amount' => (int)($this->getAmount() * 100),
-            'item_name' => $this->getDescription(),
+            // aiden - signature error when there's a trailing slash
+            'item_name' => trim($this->getDescription()),
             'passphrase' => $this->getParameter('passphrase')
           ];
           $data['header']['signature'] = $this->generateAPISignature($data);
@@ -305,7 +306,8 @@ class PurchaseRequest extends AbstractRequest
 
         $data['m_payment_id'] = $this->getTransactionId();
         $data['amount'] = $this->getAmount();
-        $data['item_name'] = $this->getDescription();
+        // aiden - signature error when there's a trailing slash
+        $data['item_name'] = trim($this->getDescription());
         $data['custom_int1'] = $this->getCustomInt1();
         $data['custom_int2'] = $this->getCustomInt2();
         $data['custom_int3'] = $this->getCustomInt3();
@@ -410,7 +412,7 @@ class PurchaseRequest extends AbstractRequest
 
     public function sendData($data)
     {
-        return $this->response = new PurchaseResponse($this, $data, $this->getEndpoint());
+        return $this->response = new PurchaseResponse($this, $data, $this->getEndpoint().'process');
     }
 
     public function getEndpoint()
